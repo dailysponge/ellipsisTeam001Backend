@@ -4,8 +4,7 @@ const assetAllocationSchema = new mongoose.Schema(
     {
         userId: { type: Number, required: true },
         amountInvested: { type: Number, required: true },
-        amountHeld: { type: Number, required: true},
-        totalValue: { type: Number, required: true }
+        amountHeld: { type: Number, required: true}
     },
     { timestamps: true }
 );

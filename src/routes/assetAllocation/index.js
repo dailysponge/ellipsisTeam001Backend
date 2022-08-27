@@ -15,7 +15,7 @@ router.get('/:userId', async (req, res) => {
                 userId: req.params.userId
             });
         if (getAssetAllocationError) {
-            throw new Error(getAssetAllocationError, conditions);
+            throw new Error(getAssetAllocationError);
         }
 
         const response = {
@@ -32,26 +32,23 @@ router.get('/:userId', async (req, res) => {
     }
 });
 
-router.post('/', async (res, req) => {
+router.post('/', async (req, res) => {
     try {
         if (
             !req.body.userId ||
             !req.body.amountInvested ||
-            !req.body.amountHeld ||
-            !req.body.totalValue
+            !req.body.amountHeld
         ) {
             throw new Error('Missing parameters');
         }
         const userId = req.body.userId;
         const amountInvested = req.body.amountInvested;
         const amountHeld = req.body.amountHeld;
-        const totalValue = req.body.totalValue;
         const [createAssetAllocationError, userAssetAllocation] =
             await assetAllocation.createAssetAllocation(
                 userId,
                 amountInvested,
-                amountHeld,
-                totalValue
+                amountHeld
             );
         if (createAssetAllocationError) {
             throw new Error(createAssetAllocationError);
@@ -67,31 +64,27 @@ router.post('/', async (res, req) => {
     } catch (error) {
         console.error("Error creating user's asset allocation", error);
         res.status(500).json("Error creating user's asset allocation");
+        // res.status(500).json("Error creating user's asset allocation");
     }
 });
 
-router.patch('/', async (res, req) => {
+router.patch('/:userId', async (req, res) => {
     try {
-        if (!req.body.userId) {
+        if (!req.params.userId) {
             throw new Error('Missing parameters');
         }
 
-        const userId = req.body.userId;
+        const userId = req.params.userId;
         const amountInvested = req.body.amountInvested || undefined;
         const amountHeld = req.body.amountHeld || undefined;
-        const totalValue = req.body.totalValue || undefined;
 
         const update = {};
         const conditions = { userId: userId };
         if (amountInvested) update.amountInvested = amountInvested;
         if (amountHeld) update.amountHeld = amountHeld;
-        if (totalValue) update.totalValue = totalValue;
 
         const [updateAssetAllocationError, userAssetAllocation] =
-            await assetAllocation.updateAssetAllocation(
-                conditions,
-                update
-            );
+            await assetAllocation.updateAssetAllocation(conditions, update);
         if (updateAssetAllocationError) {
             throw new Error(updateAssetAllocationError, conditions);
         }

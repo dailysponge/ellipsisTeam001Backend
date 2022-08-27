@@ -1,0 +1,19 @@
+{
+  "name": "ellipsisteam001backend",
+  "version": "1.0.0",
+  "description": "Backend repository for Ellipsis Tech Series Hackathon",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dailysponge/ellipsisTeam001Backend.git"
+  },
+  "author": "Justin Wang, Alethea Toh",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/dailysponge/ellipsisTeam001Backend/issues"
+  },
+  "homepage": "https://github.com/dailysponge/ellipsisTeam001Backend#readme"
+}

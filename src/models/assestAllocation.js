@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const asssetAllocationSchema = new mongoose.Schema(
+const assetAllocationSchema = new mongoose.Schema(
     {
         userId: { type: Number, required: true },
         amountInvested: { type: Number, required: true },
@@ -10,7 +10,7 @@ const asssetAllocationSchema = new mongoose.Schema(
     { timestamps: true }
 );
 
-asssetAllocationSchema.index({ userId: 1 });
+assetAllocationSchema.index({ userId: 1 });
 
-const assestAllocationModel = mongoose.model('assestAllocation', asssetAllocationSchema);
-module.exports = assestAllocationModel;
+const assetAllocationModel = mongoose.model('assetAllocation', assetAllocationSchema);
+module.exports = assetAllocationModel;

@@ -3,13 +3,13 @@ const moment = require('moment');
 require('dotenv').config();
 const router = express.Router();
 const { assetAllocation } = require('../../utils');
-const assestAllocation = require('../../utils/assestAllocation');
 
 router.get('/:userId', async (req, res) => {
     try {
         if (!req.params.userId) {
             throw new Error('Missing parameters');
         }
+
         const [getAssetAllocationError, userAssetAllocation] =
             await assetAllocation.findAssetAllocation ({
                 userId: req.params.userId
@@ -47,7 +47,7 @@ router.post('/', async (res, req) => {
         const amountHeld = req.body.amountHeld;
         const totalValue = req.body.totalValue;
         const [createAssetAllocationError, userAssetAllocation] =
-            await createAssetAllocation;
+            await assetAllocation.createAssetAllocation(userId,amountInvested,amountHeld,totalValue);
     } catch (error) {}
 });
 
@@ -62,7 +62,7 @@ router.patch('/', async (res, req) => {
         const totalValue = req.body.totalValue;
 
         const [updateAssetAllocationError, userAssetAllocation] =
-            await assetAllocation.updateAssestAllocationByUserId(
+            await assetAllocation.updateAssetAllocationByUserId(
                 {
                     userId: req.params.userId
                 },

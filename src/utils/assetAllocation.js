@@ -1,12 +1,12 @@
-const assestAllocationModel = require('../models/assestAllocation.js');
+const assetAllocationModel = require('../models/assetAllocation.js');
 
 module.exports = {
     findAssetAllocation: async (userId) => {
         try {
-            let userAssestAllocation = await assestAllocationModel
+            let userAssetAllocation = await assetAllocationModel
                 .findOne({ userId: userId })
                 .exec();
-            return [undefined, userAssestAllocation];
+            return [undefined, userAssetAllocation];
         } catch (error) {
             console.error("Error getting user's asset allocation", error);
             return [error, null];
@@ -25,15 +25,15 @@ module.exports = {
                 amountHeld,
                 totalValue
             };
-            let assestAllocation = new assestAllocationModel(doc);
-            assestAllocation = await assestAllocation.save();
-            return [undefined, assestAllocation];
+            let assesAllocation = new assetAllocationModel(doc);
+            assetAllocation = await assetAllocation.save();
+            return [undefined, assetAllocation];
         } catch (error) {
             console.error('Error creating asset allocation', error);
             return [error, null];
         }
     },
-    updateAssestAllocation: async (
+    updateAssetAllocation: async (
         userId,
         conditions
     ) => {
@@ -44,10 +44,10 @@ module.exports = {
                 amountHeld,
                 totalValue
             };
-            let userAssestAllocation = await assestAllocationModel
+            let userAssetAllocation = await assetAllocationModel
                 .findOneAndUpdate({ userId: userId }, {})
                 .exec();
-            return [undefined, userAssestAllocation];
+            return [undefined, userAssetAllocation];
         } catch {}
     }
 };

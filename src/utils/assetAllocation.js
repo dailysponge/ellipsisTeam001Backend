@@ -33,10 +33,7 @@ module.exports = {
             return [error, null];
         }
     },
-    updateAssetAllocation: async (
-        userId,
-        conditions
-    ) => {
+    updateAssetAllocation: async (conditions, update) => {
         try {
             const doc = {
                 userId,
@@ -45,7 +42,7 @@ module.exports = {
                 totalValue
             };
             let userAssetAllocation = await assetAllocationModel
-                .findOneAndUpdate({ userId: userId }, {})
+                .findOneAndUpdate(conditions, update)
                 .exec();
             return [undefined, userAssetAllocation];
         } catch {}

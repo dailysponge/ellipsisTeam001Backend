@@ -1,5 +1,14 @@
-function randomNumber(maxAmount) {
-    if (maxAmount < 1) return 0;
-    return Math.floor(Math.random() * maxAmount) + 1;
+let today = new Date()
+// // today = today.split("T")[0];
+// console.log(today.getDate());
+// console.log(today.getMonth());
+
+// console.log(typeof today);
+
+function dateConverter(dateObject) {
+    let date = dateObject.getDate();
+    let month = dateObject.getMonth()+1;
+    let year = dateObject.getFullYear();
+    return `${year}-${month}-${date}`;
 }
-console.log(randomNumber(0));
+console.log(dateConverter(today));

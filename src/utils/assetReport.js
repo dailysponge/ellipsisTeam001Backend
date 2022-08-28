@@ -182,7 +182,7 @@ module.exports = {
             const maxAmount = Math.floor(amountHeld / price);
             // buying random of stocks
             const numberOfStocks = randomNumber(maxAmount);
-            const dateBoughtAt = new Date().toLocaleDateString('en-US');
+            const dateBoughtAt = new Date();
             if (!numberOfStocks == 0) {
                 const [createRecordError, assetRecord] =
                     await createAssetRecord(
@@ -193,7 +193,7 @@ module.exports = {
                         price,
                         dateBoughtAt
                     );
-
+                    
                 const refreshAssetAllocation = await findAssetAllocation({
                     userId
                 });

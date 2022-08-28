@@ -16,7 +16,7 @@ async function getPrice(ticker, date) {
             params: {
                 from: date, // date format: yyyy-mm-dd
                 to: date,
-                apikey: '696e4097428fce0782cecf50a40cb83a'
+                apikey: '630e10a33e04fb292fd8c8b87c984686'
             }
         });
         const assetData = res.data;
@@ -29,10 +29,12 @@ async function getPrice(ticker, date) {
 async function getPortfolioByDate(userId, date) {
     try {
         totalPortfolioValue = 0;
+        console.log(typeof date);
+        let testDate = new Date('2022-08-30');
         const query = await assetReportModel
             .find({
                 userId,
-                dateBoughtAt: { $lte: date }
+                dateBoughtAt: { $lte: testDate }
             })
             .exec();
 
@@ -45,7 +47,8 @@ async function getPortfolioByDate(userId, date) {
                 record.companyTicker,
                 currDate
             );
-            stockPriceAtDate = stockPriceAtDate.historical[0].close;
+            newStockPrice = stockPriceAtDate.historical[0].close;
+            console.log(JSON.stringify(newStockPrice));
             totalPortfolioValue += stockPriceAtDate * record.numberOfStocks;
         }
         return [undefined, totalPortfolioValue];

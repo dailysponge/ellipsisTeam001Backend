@@ -74,7 +74,7 @@ async function getPrice(ticker) {
         const res = await axios.get(`/${ticker}`, {
             baseURL: 'https://fmpcloud.io/api/v3/quote',
             params: {
-                apikey: '696e4097428fce0782cecf50a40cb83a'
+                apikey: '630e10a33e04fb292fd8c8b87c984686'
             }
         });
         const assetData = res.data;
@@ -135,7 +135,7 @@ module.exports = {
             const res = await axios.get(`/${ticker}`, {
                 baseURL: 'https://fmpcloud.io/api/v3/quote',
                 params: {
-                    apikey: '696e4097428fce0782cecf50a40cb83a'
+                    apikey: '630e10a33e04fb292fd8c8b87c984686'
                 }
             });
             const assetData = res.data;
@@ -193,7 +193,7 @@ module.exports = {
                         price,
                         dateBoughtAt
                     );
-                    
+
                 const refreshAssetAllocation = await findAssetAllocation({
                     userId
                 });

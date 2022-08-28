@@ -4,7 +4,7 @@ const assetPerformanceSchema = new mongoose.Schema(
     {
         userId: { type: Number, required: true },
         date: { type: Date, required: true },
-        finalPorfolioValue: { type: Number, required: true },
+        finalPortfolioValue: { type: Number, required: true },
     },
     {timestamps: true}
 );

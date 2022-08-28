@@ -1,7 +1,61 @@
 const assetReportModel = require('../models/assetReport.js');
 const assetAllocationModel = require('../models/assetAllocation.js');
+
 const axios = require('axios');
-// const { getAssetAllocation } = require('./assetAllocation');
+
+function randomNumber(maxAmount) {
+    if (maxAmount < 1) return 0;
+    return Math.floor(Math.random() * maxAmount) + 1;
+}
+
+// copied over from assetAllocation due to cicular dependency bug
+async function findAssetAllocation(conditions) {
+    // patch at the same time
+    try {
+        const userId = conditions.userId;
+        let userAssetAllocation = await assetAllocationModel
+            .find(conditions)
+            .exec();
+        let amountHeld = userAssetAllocation[0].amountHeld;
+
+        let userAssetReport = await assetReportModel.find(conditions).exec();
+        let totalInvested = 0;
+        // updating the stock price for each row in the table
+        for (asset of userAssetReport) {
+            const ticker = asset.companyTicker;
+            const assetData = await getPrice(ticker);
+            const numberOfStocks = asset.numberOfStocks;
+            const stockPrice = assetData[0].price; // realtime stock price
+            totalInvested += stockPrice * numberOfStocks;
+            // Also update the record table at the same time to save resources :(
+            let newUserReport = await assetReportModel
+                .updateMany(
+                    { userId, companyTicker: ticker }, //condition
+                    {
+                        priceBoughtAt: stockPrice //update
+                    }
+                )
+                .exec();
+        }
+        const totalAsset = totalInvested + amountHeld;
+        let newUserAllocation = await assetAllocationModel
+            .findOneAndUpdate(
+                conditions,
+                {
+                    amountInvested: totalInvested,
+                    amountHeld: amountHeld
+                },
+                { new: true }
+            )
+            .exec();
+        newUserAllocation.totalAsset = totalAsset;
+
+        return [undefined, newUserAllocation];
+    } catch (error) {
+        console.error("Error getting user's asset allocation", error);
+        return [error, null];
+    }
+}
 
 async function getAssetAllocation(conditions) {
     try {
@@ -14,6 +68,7 @@ async function getAssetAllocation(conditions) {
         return [error, null];
     }
 }
+// connecting to external API to get current stock price
 async function getPrice(ticker) {
     try {
         const res = await axios.get(`/${ticker}`, {
@@ -29,12 +84,14 @@ async function getPrice(ticker) {
     }
 }
 
+// adding new record to the assetReport table
 const createAssetRecord = async (
     userId,
     companyName,
     companyTicker,
     numberOfStocks,
-    priceBoughtAt
+    priceBoughtAt,
+    dateBoughtAt
 ) => {
     try {
         const doc = {
@@ -42,7 +99,8 @@ const createAssetRecord = async (
             companyName,
             companyTicker,
             numberOfStocks,
-            priceBoughtAt
+            priceBoughtAt,
+            dateBoughtAt
         };
         let assetRecord = new assetReportModel(doc);
         assetRecord = await assetRecord.save();
@@ -56,6 +114,7 @@ const getAssetReport = async (conditions) => {
     try {
         let newTable = [];
         let userAssetReport = await assetReportModel.find(conditions).exec();
+        // filtering the records in the assetReport table to only have: name, tickerName & amount
         for (record of userAssetReport) {
             let totalAmount = record.priceBoughtAt * record.numberOfStocks;
             newTable.push({
@@ -64,7 +123,6 @@ const getAssetReport = async (conditions) => {
                 amount: totalAmount
             });
         }
-        console.log('THIS IS NEW TABLE', newTable);
         return [undefined, newTable];
     } catch (error) {
         console.error("Error getting user's asset report", error);
@@ -107,61 +165,58 @@ module.exports = {
             return [error, null];
         }
     },
+    // random number between 1 and 100
 
     buyAsset: async (userId, ticker) => {
         try {
             const query = assetAllocationModel.find({ userId });
             const assetAllocation = await query.exec();
             let amountHeld = assetAllocation[0].amountHeld;
-            console.log('THIS IS AMOUNT HELD', amountHeld);
 
             const newAssetAllocation = await getAssetAllocation({ userId });
-            console.log('THIS IS NEW ASSET ALLOC', newAssetAllocation);
-            const amountInvested = newAssetAllocation[1];
-            console.log('WHAT IS THIS: ', amountInvested);
+
+            let amountInvested = newAssetAllocation[1].amountInvested;
             const assetData = await getPrice(ticker);
             const price = assetData[0].price;
             const name = assetData[0].name;
             const maxAmount = Math.floor(amountHeld / price);
-            const [createRecordError, assetRecord] = await createAssetRecord(
-                userId,
-                name,
-                ticker,
-                maxAmount,
-                price
-            );
+            // buying random of stocks
+            const numberOfStocks = randomNumber(maxAmount);
+            const dateBoughtAt = new Date().toLocaleDateString('en-US');
+            if (!numberOfStocks == 0) {
+                const [createRecordError, assetRecord] =
+                    await createAssetRecord(
+                        userId,
+                        name,
+                        ticker,
+                        numberOfStocks,
+                        price,
+                        dateBoughtAt
+                    );
 
-            // PATCH THAT SHIT, the %, HERE
-            const doc = await getAssetReport({ userId });
-            userAssetReport = doc[1];
-            for (record of userAssetReport) {
-                console.log('This is amount', record.amount);
-                console.log('THIS IS INVESTED', amountInvested);
-                const percentage = Math.floor(record.amount / amountInvested);
-                const doc = assetReportModel
+                const refreshAssetAllocation = await findAssetAllocation({
+                    userId
+                });
+                amountInvested = refreshAssetAllocation[1].amountInvested;
+
+                // deduct amountHeld
+                amountHeld -= numberOfStocks * price;
+                await assetAllocationModel
                     .findOneAndUpdate(
-                        { userId },
-                        { percentageOfTotal: percentage },
-                        { new: true }
+                        { userId }, //condition
+                        {
+                            amountHeld //update
+                        }
                     )
                     .exec();
-            }
 
-            // deduct amountHeld
-            amountHeld -= maxAmount * price;
-            await assetAllocationModel
-                .findOneAndUpdate(
-                    { userId }, //condition
-                    {
-                        amountHeld //update
-                    }
-                )
-                .exec();
-
-            if (createRecordError) {
-                return [createRecordError, null];
+                if (createRecordError) {
+                    return [createRecordError, null];
+                }
+                return [undefined, assetRecord];
+            } else {
+                return [undefined, null];
             }
-            return [undefined, assetRecord];
         } catch (error) {
             console.error('Error buying asset', error);
             return [error, null];

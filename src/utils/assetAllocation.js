@@ -17,7 +17,7 @@ module.exports = {
     // },
 
     // for the generation of the homepage
-    findAssetAllocation: async (conditions) => {
+    findAssetAllocation: async (conditions) => { // patch at the same time
         try {
             const userId = conditions.userId;
             let userAssetAllocation = await assetAllocationModel

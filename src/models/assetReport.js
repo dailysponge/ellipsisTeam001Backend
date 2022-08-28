@@ -7,7 +7,8 @@ const assetReportSchema = new mongoose.Schema(
         companyTicker: { type: String, required: true },
         numberOfStocks: { type: Number, required: true },
         priceBoughtAt: { type: Number, required: true },
-        percentageOfTotal: { type: Number, required: false }
+        percentageOfTotal: { type: Number, required: false },
+        dateBoughtAt: { type: Date, required: true }
     },
     { timestamps: true }
 );

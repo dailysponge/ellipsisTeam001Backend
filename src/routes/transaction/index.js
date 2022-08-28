@@ -2,6 +2,30 @@ const express = require('express');
 const moment = require('moment');
 const { transaction }= require("../../utils")
 const router = express.Router();
+router.get ("/:userId", async (req, res) => {
+    try{
+        if (!req.params.userId) {
+            throw new Error('Missing parameters');
+        }
+        const [getTransactionError, userTransaction] = await transaction.getTransaction(
+            req.params.userId
+        );
+        if (getTransactionError) {
+            throw new Error(getTransactionError);
+        }
+        const response = {
+            status: 200,
+            timestamp: moment().format(),
+            data: {
+                userTransaction
+            }
+        };
+        res.json(response);
+    } catch (error) {
+        console.error("Error getting user's transaction", error);
+        res.status(500).json("Error getting user's transaction");
+    }
+});
 
 router.post('/', async (req, res) => {
     try {
@@ -26,7 +50,6 @@ router.post('/', async (req, res) => {
         res.status(500).json('Error creating transaction');
     }
 });
-
 router.patch('/', async (req, res) => {
     try {
         if (!req.body.userId || !req.body.deposit) {

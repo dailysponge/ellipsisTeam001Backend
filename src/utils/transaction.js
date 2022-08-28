@@ -23,5 +23,15 @@ module.exports = {
             console.error("Error getting user's asset report", error);
             return [error, null];
         }
+    },
+    getTransaction: async (userId) => {
+        try{
+            const transaction = await transactionModel.findOne({userId}).exec();
+            return [undefined,transaction]
+        } catch (error) {
+            console.error("Error getting user's asset report", error);
+            return [error, null];
+        }
     }
+    
 };

@@ -5,7 +5,7 @@ const router = express.Router();
 
 router.post('/', (req, res) => {
     try {
-        if (!req.params.userId) {
+        if (!req.body.userId || !req.body.deposit) {
             throw new Error('Missing parameters');
         }
     } catch (error) {}
